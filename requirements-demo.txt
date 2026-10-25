@@ -1,0 +1,6 @@
+# Validated locally: Python 3.12, torch 2.14.1, torchvision 0.29.1.
+# CPU inference; no CUDA packages or training dependencies required.
+torch==2.14.1
+torchvision==0.29.1
+numpy>=1.26,<3
+Pillow>=10,<13

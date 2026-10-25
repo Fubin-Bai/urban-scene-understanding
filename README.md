@@ -4,6 +4,39 @@ Pixel-level urban scene analysis with PyTorch and ResNet50 backbones. This proje
 
 ![Semantic segmentation comparison](assets/semantic-comparison.png)
 
+## Local image demo
+
+A working CPU demo is included. No retraining and no Cityscapes dataset download are required for predicting a single image. Supply the S0 checkpoint at `checkpoints/S0/best.pt`; it is already present in this local copy and is excluded from Git.
+
+On this Mac, double-click **启动街景.command**, or run from this folder:
+
+```bash
+python3 app.py
+```
+
+The browser opens at **http://127.0.0.1:8765** after loading the model. Upload a JPG, PNG, or WebP image and click the prediction button. Switch between original, overlay, and segmentation views; download the overlay, color segmentation, grayscale class-ID mask, or result JSON. The color-strength slider takes effect on the next prediction. Images are processed locally in memory, with no upload to an external service. Press Ctrl+C in the terminal to stop.
+
+If dependencies are missing, create a virtual environment and install only the demo requirements (the existing Mac environment already has them):
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r requirements-demo.txt
+python3 app.py
+```
+
+On macOS, the launcher uses `python3` on PATH. Set `URBAN_SCENE_PYTHON` to a different Python executable if needed. If Finder prevents opening the launcher, use the terminal command above. To use another port: `python3 app.py --port 8766`.
+
+Command-line inference without a browser:
+
+```bash
+python3 app.py --image /absolute/path/to/street.jpg --output outputs/my-prediction
+```
+
+Outputs are `original.png`, `segmentation.png`, `overlay.png`, `mask.png`, and `result.json`. Class IDs are Cityscapes trainIds 0–18 in the order listed in `segmentation.py`; masks are not raw Cityscapes labelIds. The model uses the original 512×256 resize and ImageNet normalization, then bilinearly resizes logits before class selection. For memory control, uploaded images are limited to 20 MB and 24 megapixels and their long edge is reduced to 1600 pixels when needed; exports match that processed image size. EXIF rotation is respected.
+
+The demo performs semantic segmentation, not instance separation or object counting. Class percentages measure predicted pixels, not accuracy or confidence. CUDA and MPS are not required; inference uses CPU. Recorded validation scores below have not been recomputed by this demo.
+
 ## Models and experiments
 
 | ID | Model | Task | Horizontal flip |
@@ -39,10 +72,13 @@ These are historical experiment records, not measurements from a fresh run of th
 
 The default configuration mounts Google Drive. For a local environment, set `MOUNT_DRIVE=False` and configure all three paths before execution; install dependencies from `requirements.txt` and use a compatible PyTorch/TorchVision pair. GPU training is recommended. Dependency versions are not fully locked, so a fresh environment has not been verified against the historical results.
 
-**Data, trained checkpoints, and full evaluation exports are not included.** Without these artifacts, existing training results cannot be regenerated merely by running in read-only mode. Static figures are provided for inspection. Notebook execution outputs are cleared for a clean checkout.
+**Data, trained checkpoints, and full evaluation exports are not tracked in Git. This local copy includes the separately downloaded S0 checkpoint.** Without these artifacts, existing training results cannot be regenerated merely by running in read-only mode. Static figures are provided for inspection. Notebook execution outputs are cleared for a clean checkout.
 
 ## Repository
 
+- `app.py`, `segmentation.py`, `web/`: standalone local demo and inference.
+- `启动街景.command`: macOS launcher.
+- `requirements-demo.txt`: minimal demo dependencies.
 - `project.ipynb`: data loading, model construction, training, evaluation, and error analysis.
 - `assets/`: recorded visual results.
 - `docs/experiments.md`: configuration, results, and limitations.
