@@ -1,0 +1,15 @@
+# Install a compatible PyTorch/TorchVision pair for your GPU first.
+# Historical run environments are recorded in docs/experiments.md.
+torch
+torchvision
+numpy>=1.26,<2.3
+pandas
+scipy
+matplotlib
+Pillow
+appdirs
+pyquaternion
+coloredlogs
+tqdm
+requests
+cityscapesScripts==2.2.4

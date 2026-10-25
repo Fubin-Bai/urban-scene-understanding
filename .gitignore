@@ -1,0 +1,51 @@
+# Local data and generated files
+data/
+outputs/
+checkpoints/
+artifacts/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.pkl
+*.joblib
+*.zip
+*.tar
+*.tar.gz
+*.7z
+
+# LaTeX build output
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.lot
+*.out
+*.synctex.gz
+*.toc
+# main.log would be caught by *.log, which is intentional
+*.log
+
+# Final PDF is submitted separately.
+report/main.pdf
+
+# Python and notebooks
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+env/
+
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+
+# Editors and operating systems
+.DS_Store
+.vscode/
+.idea/
+*:Zone.Identifier
