@@ -1,4 +1,4 @@
-"""Inference for the recorded S0 FCN checkpoint; no pretrained downloads."""
+"""Local FCN and DeepLabV3 inference; no pretrained downloads."""
 from pathlib import Path
 import io
 import time
@@ -88,7 +88,8 @@ class Segmenter:
             'id': model_key, 'name': self.model_name, 'available': True,
             'input_size': [self.width, self.height],
             'epochs': spec.get('epochs', config.get('epochs')),
-            'checkpoint_epoch': metadata.get('epoch', saved.get('epoch')),
+            'checkpoint_epoch': (metadata['history'][-1]['epoch'] if metadata.get('history')
+                                 else metadata.get('epoch', saved.get('epoch'))),
             'stage': metadata.get('stage', 'legacy'),
             'seed': metadata.get('seed', config.get('seed')),
         }

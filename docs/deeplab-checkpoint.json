@@ -1,0 +1,19 @@
+{
+  "model": "deeplab",
+  "stage": "final",
+  "seed": 9444,
+  "completed_epochs": 12,
+  "input_size": [
+    1024,
+    512
+  ],
+  "source_folder": "https://drive.google.com/drive/folders/1a8rTiwuTzDSdcUyxO3dIHhx60j5H6QCb",
+  "source_file": "last.pt",
+  "local_path": "checkpoints/DeepLabV3/model.pt",
+  "sha256": "564f8834567ad34ec1c4424d0a6d84f15d9b735b10035b62c61732db986c2e3a",
+  "archived_metrics": {
+    "miou": 0.7048863276855343,
+    "pixel_accuracy": 0.9481956693677961
+  },
+  "validation_note": "Archived metrics, not recomputed locally. Local validation checks model loading and inference only."
+}

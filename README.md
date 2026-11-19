@@ -17,7 +17,7 @@
 
 所有图片在本机处理，无需调用外部预测 API。已有权重时，无需重新训练，也无需下载完整 Cityscapes 数据集即可预测自己的图片。
 
-**功能边界：**当前演示进行语义分割，不区分同类物体的独立实例，不直接提供人数或车辆计数，也未接入视频和摄像头。类别像素占比不代表预测准确率或置信度。DeepLabV3 已接入语义推理接口，但需要另外提供兼容权重；Mask R-CNN 尚未接入交互演示。
+**功能边界：**当前演示进行语义分割，不区分同类物体的独立实例，不直接提供人数或车辆计数，也未接入视频和摄像头。类别像素占比不代表预测准确率或置信度。本机已接入并验证 DeepLabV3 最终权重；Mask R-CNN 尚未接入交互演示。
 
 ## 技术与实验设计
 
@@ -79,7 +79,9 @@ checkpoints/DeepLabV3/model.pt
 
 加载器兼容旧版 `metadata.config` 尺寸和新版 `metadata.spec` 尺寸，不会把旧权重修改成 12 轮模型。检测到 DeepLabV3 文件时默认优先使用；缺少文件时，界面明确显示不可选，仍可使用旧 FCN。加载时不下载预训练文件，模型结构与权重严格匹配。
 
-**当前验证状态：**旧 FCN 真实权重可运行；新版 checkpoint 字段兼容和导出流程有自动测试，但新版 DeepLabV3 的真实权重尚未放入项目，不能声称新模型已完成实际推理验证。历史成绩表仍属于原来的 5 轮实验。
+**当前验证状态：**本机已放入并严格加载 DeepLabV3 最终权重（seed 9444，第 12 轮，512×1024），真实图片预测和导出已验证；旧 FCN 继续保留。该权重归档记录的官方验证 mIoU 为 0.704886、pixel accuracy 为 0.948196，这些是历史记录，未在本机重跑完整验证集。上面的旧成绩表仍属于原来的 5 轮实验。
+
+权重来源：[最终模型目录](https://drive.google.com/drive/folders/1a8rTiwuTzDSdcUyxO3dIHhx60j5H6QCb)，下载 `last.pt` 后放到 `checkpoints/DeepLabV3/model.pt`。权重不进入 Git；校验信息见 `docs/deeplab-checkpoint.json`。
 
 ### 2. 准备环境
 
@@ -142,7 +144,7 @@ python3 app.py --image /absolute/path/to/street.jpg --output outputs/my-predicti
 5. 将 `PROVENANCE['source_commit']` 更新为当前真实提交，设置 `RUN_TRAINING=True` 后按顺序运行。
 6. 读取已完成的实验时设置 `RUN_TRAINING=False`，并提供配置和划分兼容的完整运行目录。
 
-本地运行 Notebook 时设置 `MOUNT_DRIVE=False`，并提前配置数据和输出路径。建议使用 GPU 训练。训练依赖未完全锁定，尚未在新环境完整复现历史结果。当前本地仅确认 S0 权重，不能直接恢复其他实验的全部输出。
+本地运行 Notebook 时设置 `MOUNT_DRIVE=False`，并提前配置数据和输出路径。建议使用 GPU 训练。训练依赖未完全锁定，尚未在新环境完整复现历史结果。本机具备 S0 与 DeepLabV3 final 权重，其余实验输出需另行取得。
 
 ## 项目结构
 
