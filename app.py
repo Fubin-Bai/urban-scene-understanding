@@ -9,7 +9,7 @@ import uuid
 from collections import OrderedDict
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from PIL import Image, UnidentifiedImageError
-from segmentation import ROOT, Segmenter, read_image
+from segmentation import ROOT, ModelRegistry, read_image
 
 
 class DemoServer(ThreadingHTTPServer):
@@ -49,7 +49,7 @@ class Handler(BaseHTTPRequestHandler):
             mime = 'application/json' if parts[3] == 'result.json' else 'image/png'
             self.reply(200,artifact,mime,parts[3])
         elif self.path == '/api/health':
-            self.reply(200, json.dumps(dict(ready=True,model='FCN-ResNet50',device='cpu')).encode())
+            self.reply(200, json.dumps(self.server.segmenter.describe(),ensure_ascii=False).encode())
         else:
             self.reply(404, b'{"error":"Not found"}')
 
@@ -78,7 +78,7 @@ class Handler(BaseHTTPRequestHandler):
         if not self.server.inference_lock.acquire(blocking=False):
             self.reply(429,json.dumps({'error':'模型正在处理其他图片，请稍后重试。'},ensure_ascii=False).encode());return
         try:
-            result = self.server.segmenter.predict(image,opacity)
+            result = self.server.segmenter.predict(image,opacity,request.get('model'))
             result['info']['original_size'] = list(original_size)
             payload = {key:'data:image/png;base64,'+base64.b64encode(value).decode()
                        for key,value in result.items() if key != 'info'}
@@ -92,6 +92,8 @@ class Handler(BaseHTTPRequestHandler):
                     self.server.downloads.popitem(last=False)
             payload['downloads'] = {name:f'/download/{token}/{name}' for name in artifacts}
             self.reply(200,json.dumps(payload,ensure_ascii=False).encode())
+        except (ValueError, FileNotFoundError) as exc:
+            self.reply(400,json.dumps({'error':str(exc)},ensure_ascii=False).encode())
         except Exception:
             import traceback
             traceback.print_exc()
@@ -102,14 +104,15 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     parser=argparse.ArgumentParser(description='Street scene semantic segmentation')
-    parser.add_argument('--checkpoint',type=Path,default=ROOT/'checkpoints/S0/best.pt')
+    parser.add_argument('--checkpoint',type=Path,help='可选：指定兼容的 FCN / DeepLabV3 权重')
+    parser.add_argument('--model',choices=['fcn','deeplab'],help='默认模型；未指定时优先使用已有 DeepLabV3')
     parser.add_argument('--port',type=int,default=8765)
     parser.add_argument('--image',type=Path,help='Run once without the browser')
     parser.add_argument('--output',type=Path,default=ROOT/'outputs/prediction')
     parser.add_argument('--no-browser',action='store_true')
     args=parser.parse_args()
-    print('正在加载 FCN-ResNet50 权重…',flush=True)
-    model=Segmenter(args.checkpoint)
+    print('正在检查本地模型权重…',flush=True)
+    model=ModelRegistry(args.checkpoint,args.model)
     if args.image:
         image,size=read_image(args.image.read_bytes())
         result=model.predict(image)

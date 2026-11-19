@@ -1,4 +1,5 @@
 """Integration checks against a running local demo: python3 test_demo.py."""
+import os
 import base64
 import io
 import json
@@ -9,7 +10,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-BASE='http://127.0.0.1:8765'
+BASE=os.environ.get('URBAN_SCENE_TEST_URL', 'http://127.0.0.1:8765')
 ROOT=Path(__file__).resolve().parent
 
 class DemoIntegration(unittest.TestCase):
@@ -53,6 +54,16 @@ class DemoIntegration(unittest.TestCase):
     def test_invalid_opacity(self):
         with self.assertRaises(urllib.error.HTTPError) as caught:
             self.post({'image':'','opacity':2})
+        self.assertEqual(caught.exception.code,400)
+
+    def test_model_availability_and_unknown_model(self):
+        with urllib.request.urlopen(BASE+'/api/health') as response:
+            health=json.load(response)
+        self.assertEqual({m['id'] for m in health['models']},{'fcn','deeplab'})
+        self.assertTrue(any(m['available'] for m in health['models']))
+        data=base64.b64encode((ROOT/'assets/semantic-S0.png').read_bytes()).decode()
+        with self.assertRaises(urllib.error.HTTPError) as caught:
+            self.post({'image':data,'model':'unsupported'})
         self.assertEqual(caught.exception.code,400)
 
 if __name__=='__main__':unittest.main()
